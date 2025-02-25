@@ -1,111 +1,137 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Changelog</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MDB Navbar and Sidebar with DataTable</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="/css/styles.css">
     <style>
-        .log-entry {
-            border: 1px solid #ccc;
-            margin: 10px;
-            padding: 15px;
-            border-radius: 5px;
-        }
-        .create { background-color: #e6ffe6; }
-        .update { background-color: #fff3e6; }
-        .delete { background-color: #ffe6e6; }
-        .timestamp { color: #666; font-size: 0.9em; }
-        .diff-section {
+        body {
             display: flex;
-            gap: 20px;
+            height: 100vh;
+            /* Full height of the viewport */
+            margin: 0;
         }
-        .before, .after {
-            width: 45%;
-            padding: 10px;
+
+        .sidebar {
+            width: 250px;
+            /* Fixed width for the sidebar */
+            background-color: #f8f9fa;
+            padding: 15px;
+            overflow-y: auto;
+            /* Enable vertical scrolling */
+            position: relative;
+            /* Position relative for proper scrolling */
         }
-        .changed { background-color: #ffffcc; }
+
+        .content {
+            flex-grow: 1;
+            /* Take the remaining space */
+            padding: 20px;
+            overflow-y: auto;
+            /* Enable vertical scrolling if needed */
+        }
     </style>
 </head>
+
 <body>
-    <h1>Changelog</h1>
-    <div id="changelog-container"></div>
+    <div class="d-flex">
+        <div class="sidebar">
+            <h4>Sidebar</h4>
+            <form class="d-flex mb-3">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Logout</a>
+                </li>
+                <!-- Add more items to demonstrate scrolling -->
+                <li class="nav-item"><a class="nav-link" href="#">Item 1</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Item 2</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Item 3</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Item 4</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Item 5</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Item 6</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Item 7</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Item 8</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Item 9</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Item 10</a></li>
+            </ul>
+        </div>
 
+        <div class="content">
+            <h2>Main Content Area</h2>
+            <p>This is where your main content will go.</p>
+
+            <!-- DataTable -->
+            <h3>User Data</h3>
+            <div class="datatable-container">
+            <table id="dataTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be populated here by AJAX -->
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.0/mdb.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
     <script>
-        async function fetchChangelog() {
-            try {
-                const response = await fetch('/users/67bd6593897336ffdd5aa499/logs');
-                const logs = await response.json();
-                renderChangelog(logs);
-            } catch (error) {
-                console.error('Error fetching changelog:', error);
-            }
-        }
+        $(document).ready(function () {
+            // Initialize DataTable
+            var table = $('#dataTable').DataTable();
 
-        function renderChangelog(logs) {
-            const container = document.getElementById('changelog-container');
-            
-            logs.forEach(log => {
-                const entry = document.createElement('div');
-                entry.className = `log-entry ${log.action}`;
+            // Fetch data using AJAX
+            $.ajax({
+                url: '/api/data',
+                method: 'GET',
+                success: function (data) {
+                    // Clear existing data
+                    table.clear();
 
-                // Timestamp
-                const timestamp = document.createElement('div');
-                timestamp.className = 'timestamp';
-                timestamp.textContent = new Date(log.timestamp).toLocaleString();
-                entry.appendChild(timestamp);
-
-                // Title
-                const title = document.createElement('h3');
-                title.textContent = `${log.action.toUpperCase()} - ${log.modelName}`;
-                entry.appendChild(title);
-
-                // Diff Section
-                const diffSection = document.createElement('div');
-                diffSection.className = 'diff-section';
-
-                // Before
-                const beforeDiv = document.createElement('div');
-                beforeDiv.className = 'before';
-                beforeDiv.innerHTML = '<h4>Before:</h4>';
-                const beforePre = document.createElement('pre');
-                if (log.before) {
-                    beforePre.innerHTML = formatDiff(log.before, log.after);
-                } else {
-                    beforePre.textContent = 'None';
+                    // Add new data to the table
+                    data.forEach(function (item) {
+                        table.row.add([
+                            item.id,
+                            item.name,
+                            item.email
+                        ]).draw();
+                    });
+                },
+                error: function (err) {
+                    console.error('Error fetching data:', err);
                 }
-                beforeDiv.appendChild(beforePre);
-                diffSection.appendChild(beforeDiv);
-
-                // After
-                const afterDiv = document.createElement('div');
-                afterDiv.className = 'after';
-                afterDiv.innerHTML = '<h4>After:</h4>';
-                const afterPre = document.createElement('pre');
-                if (log.after) {
-                    afterPre.innerHTML = formatDiff(log.after, log.before);
-                } else {
-                    afterPre.textContent = 'None';
-                }
-                afterDiv.appendChild(afterPre);
-                diffSection.appendChild(afterDiv);
-
-                entry.appendChild(diffSection);
-                container.appendChild(entry);
             });
-        }
-
-        function formatDiff(current, compare) {
-            let html = '';
-            for (const [key, value] of Object.entries(current)) {
-                const isChanged = compare && compare[key] !== value;
-                const line = `${key}: ${JSON.stringify(value)}`;
-                html += isChanged ? 
-                    `<span class="changed">${line}</span>\n` : 
-                    `${line}\n`;
-            }
-            return html;
-        }
-
-        // Fetch and render on page load
-        window.onload = fetchChangelog;
+        });
     </script>
 </body>
+
 </html>

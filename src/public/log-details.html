@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Changelog</title>
+    <style>
+        .log-entry {
+            border: 1px solid #ccc;
+            margin: 10px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .create { background-color: #e6ffe6; }
+        .update { background-color: #fff3e6; }
+        .delete { background-color: #ffe6e6; }
+        .timestamp { color: #666; font-size: 0.9em; }
+        .diff-section {
+            display: flex;
+            gap: 20px;
+        }
+        .before, .after {
+            width: 45%;
+            padding: 10px;
+        }
+        .changed { background-color: #ffffcc; }
+    </style>
+</head>
+<body>
+    <h1>Changelog</h1>
+    <div id="changelog-container"></div>
+
+    <script>
+        async function fetchChangelog() {
+            try {
+                const response = await fetch('/users/67bd6593897336ffdd5aa499/logs');
+                const logs = await response.json();
+                renderChangelog(logs);
+            } catch (error) {
+                console.error('Error fetching changelog:', error);
+            }
+        }
+
+        function renderChangelog(logs) {
+            const container = document.getElementById('changelog-container');
+            
+            logs.forEach(log => {
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${log.action}`;
+
+                // Timestamp
+                const timestamp = document.createElement('div');
+                timestamp.className = 'timestamp';
+                timestamp.textContent = new Date(log.timestamp).toLocaleString();
+                entry.appendChild(timestamp);
+
+                // Title
+                const title = document.createElement('h3');
+                title.textContent = `${log.action.toUpperCase()} - ${log.modelName}`;
+                entry.appendChild(title);
+
+                // Diff Section
+                const diffSection = document.createElement('div');
+                diffSection.className = 'diff-section';
+
+                // Before
+                const beforeDiv = document.createElement('div');
+                beforeDiv.className = 'before';
+                beforeDiv.innerHTML = '<h4>Before:</h4>';
+                const beforePre = document.createElement('pre');
+                if (log.before) {
+                    beforePre.innerHTML = formatDiff(log.before, log.after);
+                } else {
+                    beforePre.textContent = 'None';
+                }
+                beforeDiv.appendChild(beforePre);
+                diffSection.appendChild(beforeDiv);
+
+                // After
+                const afterDiv = document.createElement('div');
+                afterDiv.className = 'after';
+                afterDiv.innerHTML = '<h4>After:</h4>';
+                const afterPre = document.createElement('pre');
+                if (log.after) {
+                    afterPre.innerHTML = formatDiff(log.after, log.before);
+                } else {
+                    afterPre.textContent = 'None';
+                }
+                afterDiv.appendChild(afterPre);
+                diffSection.appendChild(afterDiv);
+
+                entry.appendChild(diffSection);
+                container.appendChild(entry);
+            });
+        }
+
+        function formatDiff(current, compare) {
+            let html = '';
+            for (const [key, value] of Object.entries(current)) {
+                const isChanged = compare && compare[key] !== value;
+                const line = `${key}: ${JSON.stringify(value)}`;
+                html += isChanged ? 
+                    `<span class="changed">${line}</span>\n` : 
+                    `${line}\n`;
+            }
+            return html;
+        }
+
+        // Fetch and render on page load
+        window.onload = fetchChangelog;
+    </script>
+</body>
+</html>

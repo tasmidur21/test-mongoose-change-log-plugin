@@ -1,0 +1,32 @@
+{
+  "name": "mongoose-change-log-plugin",
+  "version": "1.0.0",
+  "description": "A Mongoose plugin to log changes with before and after payloads for various actions",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/examples/example.js",
+    "start": "node src/examples/example.js",
+    "test": "mocha test/**/*.test.js"
+  },
+  "keywords": [
+    "mongoose",
+    "plugin",
+    "logging",
+    "change log",
+    "audit"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "peerDependencies": {
+    "mongoose": "^5.0.0 || ^6.0.0 || ^7.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.0",
+    "mocha": "^10.0.0"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "mongoose": "^8.10.1",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
